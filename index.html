@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>[ARCHIVES]</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Bebas+Neue&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Oswald:wght@200;300;400&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-deep: #161a1b;
+    --bg-mid: #2d2d2d;
+    --text-primary: #e9e5e4;
+    --text-muted: #d2d2d2;
+    --red: #ab0001;
+    --blue: #003456;
+    --red-dim: rgba(171,0,1,0.15);
+    --blue-dim: rgba(0,52,86,0.25);
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: 'Courier Prime', monospace;
+    overflow-x: hidden;
+    cursor: crosshair;
+  }
+
+  /* ── FILM GRAIN OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+    mix-blend-mode: overlay;
+  }
+
+  /* ── VHS SCANLINES ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 9998;
+  }
+
+  /* ── GLOBAL SECTION ── */
+  section { position: relative; }
+
+  /* ═══════════════════════════════
+     SECTION BACKGROUND MEDIA LAYER
+     ─────────────────────────────
+     Drop a <video> or <img> (gif) inside
+     any section with class "has-bg-media".
+     The media sits behind all VHS effects.
+
+     Usage:
+       1. Add class "has-bg-media" to the section
+       2. Place this inside the section (first child):
+            <video class="section-bg" autoplay muted loop playsinline>
+              <source src="YOUR_FILE.mp4" type="video/mp4">
+            </video>
+          OR for a gif:
+            <img class="section-bg" src="YOUR_FILE.gif" alt="">
+       3. Tune --bg-opacity and --bg-blend below
+          per section if you want different darkness
+  ═══════════════════════════════ */
+
+  .section-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 0;
+    pointer-events: none;
+    opacity: var(--bg-opacity, 0.18);
+    mix-blend-mode: var(--bg-blend, luminosity);
+  }
+
+  /* The vignette pseudo-element and all direct children
+     already use z-index ≥ 1, so the media sits below them.
+     For sections that DON'T use ::before for vignette,
+     we add a subtle dark scrim automatically. */
+  .has-bg-media::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(22, 26, 27, var(--bg-scrim, 0.55));
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* Hero already has its own ::before (vignette) — override
+     the generic scrim so the existing radial vignette wins */
+  #hero.has-bg-media::before {
+    background: radial-gradient(ellipse at center, rgba(22,26,27,0.3) 0%, rgba(0,0,0,0.88) 100%);
+  }
+
+  /* Make sure all hero content stays above the media */
+  #hero.has-bg-media .hero-content,
+  #hero.has-bg-media .vhs-corner,
+  #hero.has-bg-media .scroll-cue { z-index: 3; }
+
+  /* Per-section overrides — uncomment and adjust as needed:
+
+  #about   { --bg-opacity: 0.12; --bg-blend: luminosity; --bg-scrim: 0.65; }
+  #sound   { --bg-opacity: 0.15; --bg-blend: luminosity; --bg-scrim: 0.6;  }
+  #music   { --bg-opacity: 0.10; --bg-blend: luminosity; --bg-scrim: 0.7;  }
+  #connect { --bg-opacity: 0.14; --bg-blend: luminosity; --bg-scrim: 0.6;  }
+
+  */
+
+  /* ── TAPE REEL BORDER UTILITY ── */
+  .tape-border {
+    border-left: 3px solid var(--red);
+    padding-left: 1.2rem;
+  }
+
+  /* ═══════════════════════════════
+     HERO
+  ═══════════════════════════════ */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    padding: 2rem;
+  }
+
+  /* vignette */
+  #hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.85) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* dark blue bleed in corner */
+  #hero::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; right: -80px;
+    width: 400px; height: 400px;
+    background: var(--blue);
+    border-radius: 50%;
+    opacity: 0.08;
+    pointer-events: none;
+  }
+
+  .hero-content { position: relative; z-index: 2; }
+
+  /* TIMECODE */
+  .timecode {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    color: var(--red);
+    text-transform: uppercase;
+    margin-bottom: 2.5rem;
+    animation: blink-text 2.5s infinite;
+  }
+  @keyframes blink-text {
+    0%,100% { opacity: 1; }
+    48%,52% { opacity: 0.2; }
+  }
+
+  .timecode span.rec {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--red);
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
+    animation: pulse-rec 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse-rec {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.3; transform: scale(0.7); }
+  }
+
+  /* MAIN TITLE */
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(5rem, 18vw, 13rem);
+    line-height: 0.88;
+    letter-spacing: 0.04em;
+    color: var(--text-primary);
+    position: relative;
+    display: inline-block;
+    text-shadow: 0 0 40px rgba(171,0,1,0.2);
+  }
+
+  /* glitch effect on title */
+  .hero-title::before,
+  .hero-title::after {
+    content: '[ARCHIVES]';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+  }
+  .hero-title::before {
+    color: var(--red);
+    clip-path: polygon(0 20%, 100% 20%, 100% 35%, 0 35%);
+    animation: glitch-a 5s infinite;
+    opacity: 0.7;
+  }
+  .hero-title::after {
+    color: #003456;
+    clip-path: polygon(0 60%, 100% 60%, 100% 70%, 0 70%);
+    animation: glitch-b 5s infinite 0.2s;
+    opacity: 0.5;
+  }
+  @keyframes glitch-a {
+    0%,85%,100% { transform: translate(0); opacity: 0; }
+    86% { transform: translate(-3px, 1px); opacity: 0.7; }
+    88% { transform: translate(3px, -1px); opacity: 0.7; }
+    90%,84% { transform: translate(0); opacity: 0; }
+  }
+  @keyframes glitch-b {
+    0%,87%,100% { transform: translate(0); opacity: 0; }
+    88% { transform: translate(3px, 2px); opacity: 0.5; }
+    91% { transform: translate(-2px); opacity: 0.5; }
+    93% { transform: translate(0); opacity: 0; }
+  }
+
+  .hero-brackets {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(5rem, 18vw, 13rem);
+    color: var(--red);
+    opacity: 0.6;
+    line-height: 0.88;
+  }
+
+  .hero-tagline {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 200;
+    font-size: clamp(0.75rem, 2vw, 1rem);
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 2rem;
+    padding: 0.5rem 1.5rem;
+    border-top: 1px solid rgba(233,229,228,0.15);
+    border-bottom: 1px solid rgba(233,229,228,0.15);
+  }
+
+  /* SCROLL CUE */
+  .scroll-cue {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: rgba(210,210,210,0.4);
+    text-transform: uppercase;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .scroll-cue::after {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, rgba(210,210,210,0.4), transparent);
+    animation: grow-line 2s ease-in-out infinite;
+  }
+  @keyframes grow-line {
+    0% { transform: scaleY(0); transform-origin: top; }
+    50% { transform: scaleY(1); transform-origin: top; }
+    51% { transform: scaleY(1); transform-origin: bottom; }
+    100% { transform: scaleY(0); transform-origin: bottom; }
+  }
+
+  /* VHS Tape graphic elements in hero */
+  .vhs-corner {
+    position: absolute;
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    color: rgba(171,0,1,0.5);
+    z-index: 2;
+  }
+  .vhs-corner.tl { top: 1.5rem; left: 1.5rem; text-align: left; }
+  .vhs-corner.tr { top: 1.5rem; right: 1.5rem; text-align: right; }
+  .vhs-corner.bl { bottom: 4rem; left: 1.5rem; }
+  .vhs-corner.br { bottom: 4rem; right: 1.5rem; text-align: right; }
+
+
+  /* ═══════════════════════════════
+     ABOUT STRIP
+  ═══════════════════════════════ */
+  #about {
+    background: var(--bg-mid);
+    padding: 6rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #about::before {
+    content: 'CLASSIFIED';
+    position: absolute;
+    top: 50%;
+    left: -3rem;
+    transform: translateY(-50%) rotate(-90deg);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 5rem;
+    letter-spacing: 0.3em;
+    color: rgba(171,0,1,0.04);
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .about-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 4rem;
+    align-items: start;
+  }
+
+  .about-label {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 200;
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 1.5rem;
+  }
+
+  .about-index {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 7rem;
+    line-height: 1;
+    color: rgba(233,229,228,0.06);
+    margin-bottom: 1rem;
+  }
+
+  .about-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .meta-item {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    opacity: 0.7;
+    border-bottom: 1px solid rgba(233,229,228,0.08);
+    padding-bottom: 0.8rem;
+  }
+  .meta-item strong {
+    display: block;
+    color: var(--red);
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 0.2rem;
+    font-weight: 700;
+  }
+
+  .about-text p {
+    font-size: 1.05rem;
+    line-height: 1.9;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+  }
+  .about-text p:first-child {
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    font-style: italic;
+  }
+
+  .about-text p em {
+    color: var(--text-primary);
+    font-style: normal;
+    border-bottom: 1px solid rgba(171,0,1,0.5);
+    padding-bottom: 1px;
+  }
+
+  @media (max-width: 640px) {
+    .about-inner { grid-template-columns: 1fr; gap: 2.5rem; }
+  }
+
+
+  /* ═══════════════════════════════
+     SOUND / GENRE
+  ═══════════════════════════════ */
+  #sound {
+    padding: 7rem 2rem;
+    background: var(--bg-deep);
+    position: relative;
+  }
+
+  #sound::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--red), transparent);
+    opacity: 0.4;
+  }
+
+  .section-header {
+    max-width: 860px;
+    margin: 0 auto 4rem;
+    display: flex;
+    align-items: baseline;
+    gap: 1.5rem;
+  }
+  .section-num {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.65rem;
+    color: var(--red);
+    letter-spacing: 0.2em;
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    color: var(--text-primary);
+  }
+
+  .genre-grid {
+    max-width: 860px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: rgba(233,229,228,0.06);
+  }
+
+  .genre-cell {
+    background: var(--bg-deep);
+    padding: 2.5rem 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+  .genre-cell:hover { background: rgba(171,0,1,0.06); }
+  .genre-cell::before {
+    content: attr(data-num);
+    position: absolute;
+    top: 1rem; right: 1rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem;
+    color: rgba(233,229,228,0.04);
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .genre-icon {
+    width: 32px;
+    height: 2px;
+    background: var(--red);
+    margin-bottom: 1.5rem;
+    transition: width 0.3s;
+  }
+  .genre-cell:hover .genre-icon { width: 48px; }
+
+  .genre-name {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 300;
+    font-size: 1.1rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-primary);
+    margin-bottom: 0.8rem;
+  }
+  .genre-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    opacity: 0.65;
+    line-height: 1.7;
+  }
+
+  @media (max-width: 640px) {
+    .genre-grid { grid-template-columns: 1fr; }
+  }
+
+
+  /* ═══════════════════════════════
+     MUSIC / LISTEN
+  ═══════════════════════════════ */
+  #music {
+    padding: 7rem 2rem;
+    background: var(--bg-mid);
+    position: relative;
+  }
+  #music::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(0,52,86,0.8), transparent);
+    opacity: 0.6;
+  }
+
+  .platforms {
+    max-width: 860px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: rgba(233,229,228,0.06);
+  }
+
+  .platform-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-mid);
+    padding: 1.5rem 2rem;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: background 0.2s, padding-left 0.2s;
+    position: relative;
+    overflow: hidden;
+    gap: 1rem;
+  }
+  .platform-row::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--red);
+    transform: scaleY(0);
+    transition: transform 0.2s;
+  }
+  .platform-row:hover { background: rgba(0,0,0,0.4); padding-left: 2.6rem; }
+  .platform-row:hover::before { transform: scaleY(1); }
+
+  .platform-name {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 300;
+    font-size: 1.1rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    flex: 1;
+  }
+  .platform-handle {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    opacity: 0.5;
+    letter-spacing: 0.05em;
+  }
+  .platform-arrow {
+    font-size: 1rem;
+    color: var(--red);
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    transform: translateX(-8px);
+  }
+  .platform-row:hover .platform-arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+
+  /* ═══════════════════════════════
+     SOCIAL
+  ═══════════════════════════════ */
+  #connect {
+    padding: 7rem 2rem;
+    background: var(--bg-deep);
+    position: relative;
+  }
+  #connect::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--red), transparent);
+    opacity: 0.3;
+  }
+
+  .social-grid {
+    max-width: 860px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: rgba(233,229,228,0.06);
+  }
+
+  .social-card {
+    background: var(--bg-deep);
+    padding: 3rem 2rem;
+    text-decoration: none;
+    color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transition: background 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .social-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 2rem; right: 2rem;
+    height: 1px;
+    background: var(--red);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+  .social-card:hover { background: rgba(171,0,1,0.05); }
+  .social-card:hover::after { transform: scaleX(1); }
+
+  .social-platform {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--red);
+  }
+  .social-handle {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 0.05em;
+    color: var(--text-primary);
+  }
+  .social-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    opacity: 0.5;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 540px) {
+    .social-grid { grid-template-columns: 1fr; }
+  }
+
+
+  /* ═══════════════════════════════
+     FOOTER
+  ═══════════════════════════════ */
+  footer {
+    background: #0e1112;
+    padding: 3rem 2rem;
+    text-align: center;
+    position: relative;
+    border-top: 1px solid rgba(171,0,1,0.2);
+  }
+
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 0.15em;
+    color: rgba(233,229,228,0.15);
+    margin-bottom: 1rem;
+  }
+  .footer-copy {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: rgba(210,210,210,0.25);
+    text-transform: uppercase;
+  }
+  .footer-copy a {
+    color: rgba(171,0,1,0.5);
+    text-decoration: none;
+  }
+  .footer-copy a:hover { color: var(--red); }
+
+  .footer-tape {
+    margin: 1.5rem auto 0;
+    width: 60px;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+  }
+  .reel {
+    width: 16px; height: 16px;
+    border: 1.5px solid rgba(171,0,1,0.3);
+    border-radius: 50%;
+    position: relative;
+  }
+  .reel::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    width: 4px; height: 4px;
+    background: rgba(171,0,1,0.3);
+    border-radius: 50%;
+  }
+  .tape-line {
+    flex: 1;
+    height: 1.5px;
+    background: rgba(171,0,1,0.3);
+  }
+
+  /* ═══════════════════════════════
+     NAV
+  ═══════════════════════════════ */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 1.2rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(to bottom, rgba(22,26,27,0.95), transparent);
+    pointer-events: none;
+  }
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.25em;
+    color: var(--text-primary);
+    opacity: 0.6;
+    pointer-events: all;
+  }
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+    pointer-events: all;
+  }
+  .nav-links a {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(210,210,210,0.45);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--red); }
+
+  @media (max-width: 540px) {
+    .nav-links { display: none; }
+  }
+
+  /* ═══════════════════════════════
+     FADE-IN ON SCROLL
+  ═══════════════════════════════ */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">[ARCHIVES]</div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#sound">Sound</a></li>
+    <li><a href="#music">Listen</a></li>
+    <li><a href="#connect">Connect</a></li>
+  </ul>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+
+<section id="hero" /* add class="has-bg-media" here to activate */>
+
+  <video class="section-bg" autoplay muted loop playsinline>
+    <source src="./test.mp4" type="video/mp4">
+  </video>
+  <!-- <img class="section-bg" src="YOUR_FILE.gif" alt=""> ▲ -->
+
+  <!-- VHS corner labels -->
+  <div class="vhs-corner tl">
+    SP · HI-FI STEREO<br>
+    TAPE 001 — SIDE A
+  </div>
+  <div class="vhs-corner tr">
+    00:00:00:00<br>
+    CH 03
+  </div>
+  <div class="vhs-corner bl">
+    © ALL MATERIAL CLASSIFIED
+  </div>
+  <div class="vhs-corner br">
+    DO NOT DUPLICATE<br>
+    VAULT COPY
+  </div>
+
+  <div class="hero-content">
+    <div class="timecode">
+      <span class="rec"></span>
+      REC · AUDIO LOG ACTIVE · DO NOT REWIND
+    </div>
+
+    <div class="hero-title">[ARCHIVES]</div>
+
+    <div class="hero-tagline">
+      Metal &nbsp;·&nbsp; Orchestral &nbsp;·&nbsp; Electronic &nbsp;·&nbsp; Decay
+    </div>
+  </div>
+
+  <div class="scroll-cue">scroll</div>
+</section>
+
+
+<!-- ═══ ABOUT ═══ -->
+<!-- To add bg media: add class="has-bg-media" to the section,
+     then drop <video class="section-bg" ...> or <img class="section-bg" ...>
+     as the first child inside it. -->
+<section id="about">
+  <!-- ▼ ABOUT background media slot — uncomment to activate ▼
+  <video class="section-bg" autoplay muted loop playsinline>
+    <source src="YOUR_ABOUT_BG.mp4" type="video/mp4">
+  </video> -->
+  <div class="about-inner">
+    <!-- meta column -->
+    <div class="reveal">
+      <div class="about-label">File Reference</div>
+      <div class="about-index">001</div>
+      <div class="about-meta">
+        <div class="meta-item">
+          <strong>Classification</strong>
+          One-man project · Faceless
+        </div>
+        <div class="meta-item">
+          <strong>Status</strong>
+          Active · Recording
+        </div>
+        <div class="meta-item">
+          <strong>Genre</strong>
+          Hybrid Metal / Orch. / EDM
+        </div>
+        <div class="meta-item">
+          <strong>Years logged</strong>
+          10+ of accumulated fragments
+        </div>
+        <div class="meta-item">
+          <strong>Origin</strong>
+          The parts that didn't fit anywhere else
+        </div>
+      </div>
+    </div>
+
+    <!-- text column -->
+    <div class="about-text reveal">
+      <p>Some things can't be filed neatly. Some emotions don't fit the format. <em>[ARCHIVES]</em> is where those go.</p>
+      <p>This is a decade of built-up music knowledge pointed inward — at the weight, the grief, the anger, the wonder — and pressed into something heavy enough to hold it. Metal frameworks wrapped around orchestral depth, shot through with electronic pulse and texture. Not polished for comfort. Preserved for honesty.</p>
+      <p class="tape-border">Think of it as a vault of found footage. Old VHS reels left in forgotten boxes. Strange and melancholy and <em>real</em>. A one-man archive of the darker frequencies that life produces and most projects won't touch.</p>
+      <p>No face. No performance. Just the signal.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══ SOUND ═══ -->
+<!-- To add bg media: add class="has-bg-media" to the section tag. -->
+<section id="sound">
+  <!-- ▼ SOUND background media slot — uncomment to activate ▼
+  <video class="section-bg" autoplay muted loop playsinline>
+    <source src="YOUR_SOUND_BG.mp4" type="video/mp4">
+  </video> -->
+  <div class="section-header reveal">
+    <span class="section-num">// 002</span>
+    <h2 class="section-title">The Sound</h2>
+  </div>
+
+  <div class="genre-grid reveal">
+    <div class="genre-cell" data-num="I">
+      <div class="genre-icon"></div>
+      <div class="genre-name">Heavy Metal</div>
+      <div class="genre-desc">The structural backbone. Distorted, downtuned, and dense. Built for the weight of what the words carry.</div>
+    </div>
+    <div class="genre-cell" data-num="II">
+      <div class="genre-icon"></div>
+      <div class="genre-name">Orchestral</div>
+      <div class="genre-desc">Strings, brass, texture. The emotional depth that amplification alone can't reach. Cinematic without being theatrical.</div>
+    </div>
+    <div class="genre-cell" data-num="III">
+      <div class="genre-icon"></div>
+      <div class="genre-name">Electronic</div>
+      <div class="genre-desc">Synthetic decay. Pulsing undercurrents. The ghost signal beneath everything — the feeling that something is wrong but you can't place it.</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══ LISTEN ═══ -->
+<!-- To add bg media: add class="has-bg-media" to the section tag. -->
+<section id="music">
+  <!-- ▼ LISTEN background media slot — uncomment to activate ▼
+  <video class="section-bg" autoplay muted loop playsinline>
+    <source src="YOUR_LISTEN_BG.mp4" type="video/mp4">
+  </video> -->
+  <div class="section-header reveal">
+    <span class="section-num">// 003</span>
+    <h2 class="section-title">Listen</h2>
+  </div>
+
+  <div class="platforms reveal">
+    <a href="https://open.spotify.com/artist/musicbyarchives" class="platform-row" target="_blank" rel="noopener">
+      <span class="platform-name">Spotify</span>
+      <span class="platform-handle">musicbyarchives</span>
+      <span class="platform-arrow">→</span>
+    </a>
+    <a href="https://music.apple.com/artist/musicbyarchives" class="platform-row" target="_blank" rel="noopener">
+      <span class="platform-name">Apple Music</span>
+      <span class="platform-handle">musicbyarchives</span>
+      <span class="platform-arrow">→</span>
+    </a>
+    <a href="https://www.youtube.com/@musicbyarchives" class="platform-row" target="_blank" rel="noopener">
+      <span class="platform-name">YouTube</span>
+      <span class="platform-handle">@musicbyarchives</span>
+      <span class="platform-arrow">→</span>
+    </a>
+    <a href="https://soundcloud.com/musicbyarchives" class="platform-row" target="_blank" rel="noopener">
+      <span class="platform-name">SoundCloud</span>
+      <span class="platform-handle">musicbyarchives</span>
+      <span class="platform-arrow">→</span>
+    </a>
+    <a href="https://musicbyarchives.bandcamp.com" class="platform-row" target="_blank" rel="noopener">
+      <span class="platform-name">Bandcamp</span>
+      <span class="platform-handle">musicbyarchives</span>
+      <span class="platform-arrow">→</span>
+    </a>
+  </div>
+</section>
+
+
+<!-- ═══ CONNECT ═══ -->
+<!-- To add bg media: add class="has-bg-media" to the section tag. -->
+<section id="connect">
+  <!-- ▼ CONNECT background media slot — uncomment to activate ▼
+  <video class="section-bg" autoplay muted loop playsinline>
+    <source src="YOUR_CONNECT_BG.mp4" type="video/mp4">
+  </video> -->
+  <div class="section-header reveal">
+    <span class="section-num">// 004</span>
+    <h2 class="section-title">Connect</h2>
+  </div>
+
+  <div class="social-grid reveal">
+    <a href="https://www.instagram.com/musicbyarchives" class="social-card" target="_blank" rel="noopener">
+      <span class="social-platform">Instagram</span>
+      <span class="social-handle">@musicbyarchives</span>
+      <span class="social-sub">Visual fragments. Behind the tape. Found footage and process.</span>
+    </a>
+    <a href="https://www.tiktok.com/@musicbyarchives" class="social-card" target="_blank" rel="noopener">
+      <span class="social-platform">TikTok</span>
+      <span class="social-handle">@musicbyarchives</span>
+      <span class="social-sub">Short form signal. Clips, concepts, and audio reels from the vault.</span>
+    </a>
+    <a href="https://twitter.com/musicbyarchives" class="social-card" target="_blank" rel="noopener">
+      <span class="social-platform">X / Twitter</span>
+      <span class="social-handle">@musicbyarchives</span>
+      <span class="social-sub">Transmissions. Updates. The raw feed.</span>
+    </a>
+    <a href="mailto:contact@musicbyarchives.com" class="social-card">
+      <span class="social-platform">Email</span>
+      <span class="social-handle">Contact</span>
+      <span class="social-sub">Licensing, collaboration, or anything that doesn't belong in a comment section.</span>
+    </a>
+  </div>
+</section>
+
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-logo">[ARCHIVES]</div>
+  <div class="footer-tape">
+    <div class="reel"></div>
+    <div class="tape-line"></div>
+    <div class="reel"></div>
+  </div>
+  <br>
+  <div class="footer-copy">
+    All material contained herein is classified. &nbsp;·&nbsp;
+    <a href="https://instagram.com/musicbyarchives">@musicbyarchives</a>
+    &nbsp;·&nbsp; Do not duplicate.
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Subtle VHS glitch horizontal shift on scroll
+  let lastY = 0;
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY;
+    const delta = Math.abs(y - lastY);
+    if (delta > 30) {
+      document.body.style.filter = 'brightness(0.97)';
+      setTimeout(() => { document.body.style.filter = ''; }, 80);
+    }
+    lastY = y;
+  }, { passive: true });
+
+  // Live timecode in corner
+  function updateTimecode() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    const s = String(now.getSeconds()).padStart(2,'0');
+    const ms = String(Math.floor(now.getMilliseconds()/10)).padStart(2,'0');
+    const el = document.querySelector('.vhs-corner.tr');
+    if (el) el.innerHTML = `${h}:${m}:${s}:${ms}<br>CH 03`;
+  }
+  setInterval(updateTimecode, 50);
+</script>
+</body>
+</html>
